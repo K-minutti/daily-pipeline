@@ -22,6 +22,34 @@ class AlphaVantageSource(DataSource):
         response.raise_for_status()  # Raises stored HTTPError, if one occurred.
         return response.json()
 
+class AlpacaMarketsSource(DataSource):
+    def __init__(self):
+        self.api_key = os.getenv("ALPACA_API_KEY")
+        self.api_secret = os.getenv("ALPACA_API_SECRET")
+        self.url = "https://data.alpaca.markets/v1/bars/1D"
+
+    def fetch_data(self, symbol: str) -> Dict:
+        headers = {
+            'APCA-API-KEY-ID': self.api_key, 
+            'APCA-API-SECRET-KEY': self.api_secret
+        }
+        params = {'symbols': symbol}
+        response = requests.get(self.url, headers=headers, params=params)
+        response.raise_for_status()
+        return response.json()
+
+class QuantConnectsSource(DataSource):
+    def __init__(self):
+        self.api_key = os.getenv("QUANTCONNECT_API_KEY") 
+        self.url = "https://www.quantconnect.com/api/v2/data/read"
+
+    def fetch_data(self, symbol: str) -> Dict:
+        headers = {'Authorization': self.api_key}
+        params = {'symbol': symbol}
+        response = requests.get(self.url, headers=headers, params=params)
+        response.raise_for_status()
+        return response.json()
+
 class S3Uploader:
     def __init__(self):
         self.s3 = boto3.client('s3')
